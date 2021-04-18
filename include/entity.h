@@ -1,21 +1,8 @@
 #pragma once
 
 
-struct Colour
-{
-	int r;
-	int g;
-	int b;
-
-};
-
-struct Vec2
-{
-	float x;
-	float y;
-
-};
-
+struct Colour{int r;int g;int b;};
+struct Vec2{float x;float y;};
 
 class Entity
 {
@@ -40,6 +27,5 @@ public:
 	int getRadius();
 	static void setMapSize(float width, float height);
 	void updateSize(int radius);
-
 };
 

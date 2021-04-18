@@ -14,7 +14,7 @@ int Entity::getRadius()
 	return radius;
 }
 
-
+//calculate total area of player and consumed enemy and find new radius
 void Entity::updateSize(int consumedRadius)
 {
 	float newArea = (3.14 * pow(radius, 2)) + (3.14 * pow(consumedRadius, 2));

@@ -27,7 +27,6 @@ public:
 	void updateVelY(int posNeg);
 	float getSpeedIncrement();
 	void checkOutsideMap();
-
 };
 
 
