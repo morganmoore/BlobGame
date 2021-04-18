@@ -17,7 +17,6 @@ struct Vec2
 };
 
 
-
 class Entity
 {
 protected:

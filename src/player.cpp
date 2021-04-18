@@ -2,22 +2,18 @@
 #include <cmath>
 #include "player.h"
 
-
+//drawing the player sphere to the screen
 void Player::draw(sf::RenderWindow& app)
 {
 	playerShape.setRadius(radius);
 	playerShape.setOrigin(radius, radius);
-	//std::cout << "PSZ: " << psz << std::endl;
-	playerShape.setFillColor(sf::Color(250, 150, 0));
 	playerShape.setPosition(pos.x, pos.y);
 	app.draw(playerShape);
 }
 
+//using mouse potion to determine a direction vector that will be used to increment the position of the player
 void Player::updatePos(float x, float y)
 {
-	
-
-
 	//direction vector
 	float dirX = pos.x - x;
 	float dirY = pos.y - y;

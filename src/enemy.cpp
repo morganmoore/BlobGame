@@ -1,8 +1,5 @@
 #include "enemy.h"
 
-#include <iostream>
-
-
 void Enemy::updateVelX(int posNeg)
 {
     vel.x += (rand() % (int)(speedIncrement * 2 + 1))*posNeg;
@@ -18,6 +15,7 @@ float Enemy::getSpeedIncrement()
     return speedIncrement;
 }
 
+//limit the velocity to the max and min values and then add it to the position x,y vector
 void Enemy::updatePos()
 {
     vel.x = std::max(-5.0f, std::min(vel.x, 5.0f));
@@ -25,14 +23,15 @@ void Enemy::updatePos()
     pos.x += vel.x; //-offsetX);
     pos.y += vel.y;
 
-	
 }
 
+//check to see if the enemy sphere is approaching of past the boundary of the map
+//if so, move away from edge
+//if not randomly move
 void Enemy::checkOutsideMap()
 {
     if ((pos.x<500 || pos.x>mapW + 500) || (pos.y < 500 || pos.y>mapH + 500))
     {
-        std::cout << mapH;
         if (pos.x < 500) { updateVelX(1); }
         else if (pos.x > mapW + 500) { updateVelX(-1); }
         if (pos.y < 500) { updateVelY(1); }
@@ -47,11 +46,9 @@ void Enemy::checkOutsideMap()
     }
 }
 
+//update the enemy sphere position and draw it
 void Enemy::draw(sf::RenderWindow& app)
 {
-    enemyShape.setOrigin(radius, radius);
-    enemyShape.setFillColor(sf::Color(colour.r, colour.g, colour.b));
-    //enemyShape.setOutlineColor(sf::Color::Red);
     enemyShape.setPosition(pos.x, pos.y);
     app.draw(enemyShape);
 }

@@ -3,7 +3,7 @@
 #include "entity.h"
 #include <SFML/Graphics.hpp>
 
-
+//enemy class to control enemy movement, behaviour, appearance etc
 class Enemy : public Entity
 {
 	sf::CircleShape enemyShape;
@@ -17,6 +17,8 @@ public:
 		:Entity(radius1, pos1, colour1)
 	{
 		enemyShape.setRadius(radius1);
+		enemyShape.setOrigin(radius, radius);
+		enemyShape.setFillColor(sf::Color(colour.r, colour.g, colour.b));
 	}
 
 	void updatePos();

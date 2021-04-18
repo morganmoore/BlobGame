@@ -5,7 +5,7 @@
 #include "player.h"
 #include<windows.h>
 
-
+//get random float between two values
 float randomFloat(float a, float b) {
     float random = ((float)rand()) / (float)RAND_MAX;
     float diff = b - a;
@@ -13,6 +13,7 @@ float randomFloat(float a, float b) {
     return a + r;
 }
 
+//get distance between two points
 float getDistance(int x1, int y1, int x2, int y2)
 {
     // Calculating distance
@@ -20,52 +21,59 @@ float getDistance(int x1, int y1, int x2, int y2)
         pow(y2 - y1, 2) );
 }
 
-void updateCamera(Player player, sf::View& view, sf::RenderWindow& app, float centreX, float centreY, float mapW, float mapH, float cameraX, float cameraY)
+//to do: create class for both camera and User Interface
+
+//update camera viewing plane in repsonse to player movment or increase in size
+void updateCamera(Player player, sf::View& view, sf::RenderWindow& app, float centreX, float centreY, float mapW, float mapH, float cameraW, float cameraH)
 {
     
     view.setCenter(centreX, centreY);
     app.setView(view);
-    float newViewX = 1000 * pow(player.getRadius() / 20, 0.1);
-    float newViewY = 700 * pow(player.getRadius() / 20, 0.1);
-    if (cameraX < newViewX) { cameraX += 1; }
-    if (cameraY < newViewY) { cameraY += 1; }
-    view.setSize(cameraX, cameraY);
+
+	//adjusting camera view to the size of the player e.g. larger view as player size increases
+    float newViewX = cameraW * pow(player.getRadius() / 20, 0.1);
+    float newViewY = cameraH * pow(player.getRadius() / 20, 0.1);
+
+	//gradually increment to new value
+    if (cameraW < newViewX) { cameraW += 1; }
+    if (cameraH < newViewY) { cameraH += 1; }
+	
+    view.setSize(cameraW, cameraH);
 }
 
+//draw 'mini player' to mini map and move map with player movement
 void updateMiniMap(sf::Sprite& sMiniMap, sf::RenderWindow& app, float centreX, float centreY, float bgW, float bgH, Player player, sf::CircleShape& miniMapDot)
 {
     sMiniMap.setPosition(centreX + 230, centreY + 80);
-
-
-    miniMapDot.setRadius(5);
-    miniMapDot.setOrigin(5, 5);
-    std::cout << "PSZ: " << player.getRadius() << std::endl;
-    miniMapDot.setFillColor(sf::Color(250, 150, 0));
     miniMapDot.setPosition((centreX + 185) + (player.getPos().x / bgW) * 355, (centreY + 35) + (player.getPos().y / bgH) * 355);
-
-
     app.draw(sMiniMap);
     app.draw(miniMapDot);
 	
 }
 
-
-
-
-
 int main()
 {
     srand(time(0));
-    const float cameraX= 1000.0f;
-    const float cameraY = 700.0f;
+	
+	//size of camera viewing plane
+    const float cameraW= 1000.0f;
+    const float cameraH = 700.0f;
+
+	//full background image width and height
     const int bgW = 3000;
     const int bgH = 3000;
-    const float mapW = bgW-cameraX;
-    const float mapH = bgH -cameraY;
+
+	//the width and height of the playable area,
+    const float mapW = bgW- cameraW;
+    const float mapH = bgH -cameraH;
+
+	//position of camera viewing plane
     float centreX = bgW / 2;
     float centreY = bgH / 2;
-    sf::RenderWindow app(sf::VideoMode(cameraX, cameraY), "Doodle Game!");
-    sf::View view(sf::Vector2f(centreX, centreY), sf::Vector2f(cameraX, cameraY));
+
+	//creating window and setting viewing plane
+    sf::RenderWindow app(sf::VideoMode(cameraW, cameraH), "Doodle Game!");
+    sf::View view(sf::Vector2f(centreX, centreY), sf::Vector2f(cameraW, cameraH));
     app.setView(view);
 
     app.setFramerateLimit(80);
@@ -74,11 +82,10 @@ int main()
 
     Player player(20, { centreX, centreY }, { 255,200,0 }, 20.f, "Player 1");
 
-    //std::vector<Enemy> enemies(20);
     int numEnemies = 20;
     std::vector<Enemy> enemies;
 
- 
+	//creating and intialising the number of Enemies
 	for(int i = 0; i<= numEnemies; i++)
 	{
 		Vec2 pos = {rand() % (int)mapW + 500, rand() % (int)mapH + 500};
@@ -87,32 +94,39 @@ int main()
         Enemy enemy(rad, pos, col);
         enemies.push_back(enemy);
 	}
- 
+
+	//loading texture needed for game
     sf::Texture t1,t2,t3;
     t1.loadFromFile("images/background5.png");
     t2.loadFromFile("images/minimap.png");
-    t3.loadFromFile("images/gameOver.png");
 
+	//creating sprites with textures
     sf::Sprite sBackground(t1), sMiniMap(t2);
 
     sf::CircleShape miniMapDot(4);
+    miniMapDot.setRadius(5);
+    miniMapDot.setOrigin(5, 5);
+    miniMapDot.setFillColor(sf::Color(250, 150, 0));
+	
     int first_time = time(NULL);
     bool bDead = false;
+
+	//the distance from which enemies will become aware of player
+    float awareDistance = 20.f;
+
+    //program main loop
     while (app.isOpen())
     {
 	    sf::Event e;
         while (app.pollEvent(e))
         {
+        	//if the window is closed
             if (e.type == sf::Event::Closed)
             {
-                //clock_t end = std::clock();
+                //print frames per second and close window
                 int second_time = time(NULL);
                 std::cout << framecount / (second_time - first_time) << std::endl;
-                std::cout << "heyyy" << framecount << std::endl;
-                std::cout << CLOCKS_PER_SEC << std::endl;
-                //std::cin.ignore();
-                app.close();
-                
+                app.close(); 
             }
         }
         
@@ -129,68 +143,67 @@ int main()
         for (int i = 0; i<enemies.size(); i++)
         {
             float distFromPlayer = getDistance(enemies[i].getPos().x, enemies[i].getPos().y, player.getPos().x, player.getPos().y);
-            std::cout << "Distance: " << distFromPlayer << std::endl;
-            if (distFromPlayer < (enemies[i].getRadius() + player.getRadius() +20))
+            
+
+        	//if the player and enemy are within 'aware distance' units of each other
+            if (distFromPlayer < (enemies[i].getRadius() + player.getRadius() + awareDistance))
             {
-                std::cout << "Index1: " << i << std::endl;
+                //if enemy bigger than player
                 if (enemies[i].getRadius() > player.getRadius())
                 {
+                    //if enemy and player overlapping 
                 	if(distFromPlayer <(enemies[i].getRadius() + player.getRadius()))
                 	{
-                      
-                        bDead = true;
-                        //Sleep(100);
+                        //print frames per second and close window
+                        int second_time = time(NULL);
+                        std::cout << framecount / (second_time - first_time) << std::endl;
                         app.close();
                         break;
-                		
                 	}
-                    
+                    //else move enemy towards player
                     if (enemies[i].getPos().x < player.getPos().x - enemies[i].getSpeedIncrement()) { enemies[i].updateVelX(1); }
                     else if (enemies[i].getPos().x > player.getPos().x + enemies[i].getSpeedIncrement()) { enemies[i].updateVelX(-1); }
                     if (enemies[i].getPos().y < player.getPos().y - enemies[i].getSpeedIncrement()) { enemies[i].updateVelY(1); }
                     else if (enemies[i].getPos().y > player.getPos().y + enemies[i].getSpeedIncrement()) { enemies[i].updateVelY(-1); }
                 }
-                
+                //if player bigger than enemy
                 else
                 {
-                    
+                    //if enemy and player overlapping 
                     if (distFromPlayer < (enemies[i].getRadius() + player.getRadius()))
                     {
-                        std::cout << "erase1" << std::endl;
+                    	//remove enemy from vector and ajust increment (--i)
                         player.updateSize(enemies[i].getRadius());
                         enemies.erase(enemies.begin() + i);
-                        std::cout << "erase2" << std::endl;
-                        
                         --i;
-                        
                     }
-                	
                     else
                     {
+                    	//move enemy away from player
                         if (enemies[i].getPos().x < player.getPos().x - 2) { enemies[i].updateVelX(-1); }
                         else if (enemies[i].getPos().x > player.getPos().x + 2) { enemies[i].updateVelX(1); }
                         if (enemies[i].getPos().y < player.getPos().y - 2) { enemies[i].updateVelY(-1); }
                         else if (enemies[i].getPos().y > player.getPos().y + 2) { enemies[i].updateVelY(1); }
-                    }
-                     
+                    }  
                 }		
             }
+        	
             else
             {
-                std::cout << "check outside" << std::endl;
+                //check if enemy is outside map
                 enemies[i].checkOutsideMap();
-
             }
         	
+        	//update enemy position and draw to screen
             enemies[i].updatePos();
             enemies[i].draw(app);
         }
 
-        centreX = std::max(cameraX / 2, std::min(player.getPos().x, mapW + cameraX / 2));
-        centreY = std::max(cameraY / 2, std::min(player.getPos().y, mapH + cameraY / 2));
+    	//setting the position of the camera viewing plane
+        centreX = std::max(cameraW / 2, std::min(player.getPos().x, mapW + cameraW / 2));
+        centreY = std::max(cameraH / 2, std::min(player.getPos().y, mapH + cameraH / 2));
 
-        updateCamera(player, view, app, centreX, centreY,  mapW, mapH, cameraX, cameraY);
-
+        updateCamera(player, view, app, centreX, centreY,  mapW, mapH, cameraW, cameraH);
         updateMiniMap(sMiniMap, app, centreX, centreY, bgW, bgH, player, miniMapDot);
 
     app.display();
