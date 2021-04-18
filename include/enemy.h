@@ -23,6 +23,7 @@ public:
 	void draw(sf::RenderWindow& app);
 	void updateVelX(int posNeg);
 	void updateVelY(int posNeg);
+	float getSpeedIncrement();
 	void checkOutsideMap();
 
 };
