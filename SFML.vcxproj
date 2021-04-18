@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="enemy.cpp" />
+    <ClCompile Include="entity.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\player.cpp" />
   </ItemGroup>

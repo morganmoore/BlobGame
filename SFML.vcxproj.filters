@@ -21,6 +21,12 @@
     <ClCompile Include="src\player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="enemy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\enemy.h">

@@ -4,9 +4,9 @@
 #include "enemy.h"
 #include "player.h"
 #include<windows.h>
-using namespace sf;
 
-float RandomFloat(float a, float b) {
+
+float randomFloat(float a, float b) {
     float random = ((float)rand()) / (float)RAND_MAX;
     float diff = b - a;
     float r = random * diff;
@@ -20,49 +20,87 @@ float getDistance(int x1, int y1, int x2, int y2)
         pow(y2 - y1, 2) );
 }
 
-
-
-
-
-
-struct point
-{ int x,y;};
-
-void drawEnemy(RenderWindow& app, Enemy& e)
+void updateCamera(Player player, sf::View& view, sf::RenderWindow& app, float mapW, float mapH, float cameraX, float cameraY)
 {
-    CircleShape enemyShape(e.size);
-    enemyShape.setOrigin(e.size, e.size);
-    enemyShape.setFillColor(sf::Color(e.colour.r, e.colour.g, e.colour.b));
-    //enemyShape.setOutlineColor(sf::Color::Red);
-    enemyShape.setPosition(e.pos.x, e.pos.y);
-    app.draw(enemyShape);
+    float tmpX = cameraX / 2;
+    float tmpY = cameraY / 2;
+    float centreX = std::max(tmpX, std::min(player.getPos().x, mapW + tmpX));
+    float centreY = std::max(tmpY, std::min(player.getPos().y, mapH + tmpY));
+    view.setCenter(centreX, centreY);
+    app.setView(view);
+    float newViewX = 1000 * pow(player.getRadius() / 20, 0.1);
+    float newViewY = 700 * pow(player.getRadius() / 20, 0.1);
+    if (cameraX < newViewX) { cameraX += 1; }
+    if (cameraY < newViewY) { cameraY += 1; }
+    view.setSize(cameraX, cameraY);
 }
+
+void updateMiniMap(sf::Sprite& sMiniMap, sf::RenderWindow& app, const float centreX, const float centreY, float bgW, float bgH, Player player, sf::CircleShape& miniMapDot)
+{
+    sMiniMap.setPosition(centreX + 230, centreY + 80);
+
+
+    miniMapDot.setRadius(5);
+    miniMapDot.setOrigin(5, 5);
+    std::cout << "PSZ: " << player.getRadius() << std::endl;
+    miniMapDot.setFillColor(sf::Color(250, 150, 0));
+    miniMapDot.setPosition((centreX + 185) + (player.getPos().x / bgW) * 355, (centreY + 35) + (player.getPos().y / bgH) * 355);
+
+
+    app.draw(sMiniMap);
+    app.draw(miniMapDot);
+	
+}
+
+
+
+
+float Entity::mapH = mapW;
+float Entity::mapW = mapW;
+
 
 int main()
 {
     srand(time(0));
-    float cameraX= 1000.0f;
-    float cameraY = 700.0f;
-    int bgW = 3000;
-    int bgH = 3000;
-    float mapW = bgW-cameraX;
-    float mapH = bgH -cameraY;
+    const float cameraX= 1000.0f;
+    const float cameraY = 700.0f;
+    const int bgW = 3000;
+    const int bgH = 3000;
+    const float mapW = bgW-cameraX;
+    const float mapH = bgH -cameraY;
     float centreX = bgW / 2;
     float centreY = bgH / 2;
-    RenderWindow app(VideoMode(cameraX, cameraY), "Doodle Game!");
-    View view(Vector2f(centreX, centreY), sf::Vector2f(cameraX, cameraY));
+    sf::RenderWindow app(sf::VideoMode(cameraX, cameraY), "Doodle Game!");
+    sf::View view(sf::Vector2f(centreX, centreY), sf::Vector2f(cameraX, cameraY));
     app.setView(view);
 
     
+    
+	
+	
+	
+
 	
     app.setFramerateLimit(80);
     int framecount = 0;
     
 
-    Player player(20, { centreX, centreY }, { 0.0f, 0.0f }, { 255,200,0 });
+    Player player(20, { centreX, centreY }, { 255,200,0 }, 20.f, "Player 1");
 
-	
+    //std::vector<Enemy> enemies(20);
+    int numEnemies = 20;
+    std::vector<Enemy> enemies;
 
+ 
+	for(int i = 0; i<= numEnemies; i++)
+	{
+		Vec2 pos = {rand() % (int)mapW + 500, rand() % (int)mapH + 500};
+        Colour col = { rand() % 215 + 40, rand() % 215 + 40, rand() % 215 + 40 };
+        float rad = randomFloat(10.f, 25.f);
+        Enemy enemy(rad, pos, col);
+        enemies.push_back(enemy);
+	}
+    /*
     std::vector<Enemy> enemies(20);
 
     for (auto& e : enemies)
@@ -74,25 +112,16 @@ int main()
         e.colour.g = rand() % 240 + 40;
         e.colour.b = rand() % 240 + 40;
 
-        //std::cout << "X: " << e.pos.x << "   Y: " << e.pos.y << std::endl;
-
     }
+    */
 
-    
-    // map a 100x100 textured rectangle to the shape
-    //shape.setTexture(&texture); // texture is a sf::Texture
-    //shape.setTextureRect(sf::IntRect(10, 10, 100, 100));
-    
-
-    std::cout << "0000000000000" << std::endl;
-    
-    Texture t1,t2,t3;
+    sf::Texture t1,t2,t3;
     t1.loadFromFile("images/background5.png");
     t2.loadFromFile("images/minimap.png");
     t3.loadFromFile("images/gameOver.png");
-	
 
-    Sprite sBackground(t1), sMiniMap(t2);
+
+    sf::Sprite sBackground(t1), sMiniMap(t2);
 
     //sMiniMap.setPosition(centreX+220, centreY+100);
 
@@ -109,17 +138,17 @@ int main()
     int prevY = cameraY / 2;
     float tmpX;
     float tmpY;
-    CircleShape playerShape(20);
-    CircleShape miniMapDot(4);
+    sf::CircleShape playerShape(20);
+    sf::CircleShape miniMapDot(4);
     //clock_t start = std::clock();
     int first_time = time(NULL);
     bool bDead = false;
     while (app.isOpen())
     {
-        Event e;
+	    sf::Event e;
         while (app.pollEvent(e))
         {
-            if (e.type == Event::Closed)
+            if (e.type == sf::Event::Closed)
             {
                 //clock_t end = std::clock();
                 int second_time = time(NULL);
@@ -131,94 +160,86 @@ int main()
                 
             }
         }
-        if (Keyboard::isKeyPressed(Keyboard::Right)) { playerSpeedX = 0.2; }
-        else if (Keyboard::isKeyPressed(Keyboard::Left)) { playerSpeedX = -0.2; }
-        else { playerSpeedX = 0; }
-        if (Keyboard::isKeyPressed(Keyboard::Up)) playerSpeedY = -0.2;
-        else if (Keyboard::isKeyPressed(Keyboard::Down)) playerSpeedY = 0.2;
-        else { playerSpeedY = 0; }
+        
 
-        const Vector2i mousePosition{ Mouse::getPosition(app) };
-        const Vector2f mouseCoord{ app.mapPixelToCoords(mousePosition) };
-        player.updatePos(mouseCoord.x, mouseCoord.y);
+        
        
         framecount++;
     	
         app.draw(sBackground);
 
-    	
-        //player.updateVel(playerSpeedX, playerSpeedY);
+        const sf::Vector2i mousePosition{ sf::Mouse::getPosition(app) };
+        const sf::Vector2f mouseCoord{ app.mapPixelToCoords(mousePosition) };
+        player.updatePos(mouseCoord.x, mouseCoord.y);
+        player.draw(app);
 
         
         std::cout << "1111111111" << std::endl;
     	
-        Position pp = player.getPos();
-        float psz = player.getSize();
+        //Vec2 pp = player.getPos();
+        //float psz = player.getRadius();
 
         
 
-    
-        
-        playerShape.setRadius(psz);
-        playerShape.setOrigin(psz, psz);
-        std::cout << "PSZ: " << psz << std::endl;
+		
+        /*
+        playerShape.setRadius(player.getRadius());
+        playerShape.setOrigin(player.getRadius(), player.getRadius());
+        //std::cout << "PSZ: " << psz << std::endl;
         playerShape.setFillColor(sf::Color(250, 150, 0));
-        playerShape.setPosition(pp.x, pp.y);
+        playerShape.setPosition(player.getPos().x, player.getPos().y);
         app.draw(playerShape);
+
+        */
     	
         for (int i = 0; i<enemies.size(); i++)
         {
+            //enemies[i].updatePos(player.getPos(), player.getRadius(), app);
             
-            std::cout << "2222222222" << std::endl;
-            float dst = getDistance(enemies[i].pos.x, enemies[i].pos.y, pp.x, pp.y);
+            float dst = getDistance(enemies[i].getPos().x, enemies[i].getPos().y, player.getPos().x, player.getPos().y);
             std::cout << "Distance: " << dst << std::endl;
-            if ( dst  < (enemies[i].size + psz+20))
+            if ( dst  < (enemies[i].getRadius() + player.getRadius() +20))
             {
                 std::cout << "Index1: " << i << std::endl;
-                if (enemies[i].size > psz)
+                if (enemies[i].getRadius() > player.getRadius())
                 {
-                	if(dst<(enemies[i].size+psz))
+                	if(dst<(enemies[i].getRadius() + player.getRadius()))
                 	{
-                        //delete &player; 
-                        
+                      
                         bDead = true;
-                        //Sprite sBackground(t3);
                         //Sleep(100);
                         app.close();
                         break;
                 		
                 	}
                     std::cout << "Test: " << dst << std::endl;
-                    if (enemies[i].pos.x < pp.x - enemySpeed) { enemies[i].vel.x += enemySpeed; }
-                    else if (enemies[i].pos.x > pp.x + enemySpeed) { enemies[i].vel.x -= enemySpeed; }
-                    if (enemies[i].pos.y < pp.y - enemySpeed) { enemies[i].vel.y += enemySpeed; }
-                    else if (enemies[i].pos.y > pp.y + enemySpeed) { enemies[i].vel.x -= enemySpeed; }
+                    if (enemies[i].getPos().x < player.getPos().x - enemySpeed) { enemies[i].updateVelX(1); }
+                    else if (enemies[i].getPos().x > player.getPos().x + enemySpeed) { enemies[i].updateVelX(-1); }
+                    if (enemies[i].getPos().y < player.getPos().y - enemySpeed) { enemies[i].updateVelY(1); }
+                    else if (enemies[i].getPos().y > player.getPos().y + enemySpeed) { enemies[i].updateVelY(-1); }
                 }
                 
                 else
                 {
                     
-                    if (dst < (enemies[i].size + psz))
+                    if (dst < (enemies[i].getRadius() + player.getRadius()))
                     {
                         std::cout << "erase1" << std::endl;
-                        player.updateSize(enemies[i].size);
+                        player.updateSize(enemies[i].getRadius());
                         enemies.erase(enemies.begin() + i);
                         std::cout << "erase2" << std::endl;
                         
                         --i;
                         std::cout << enemies.size() << " enemies left" << std::endl;
-                        std::cout << "I: " << i <<std::endl;
-                        
-                        continue;
 
                     }
                 	
                     else
                     {
-                        if (enemies[i].pos.x < pp.x - 2) { enemies[i].vel.x -= enemySpeed; }
-                        else if (enemies[i].pos.x > pp.x + 2) { enemies[i].vel.x += enemySpeed; }
-                        if (enemies[i].pos.y < pp.y - 2) { enemies[i].vel.y -= enemySpeed; }
-                        else if (enemies[i].pos.y > pp.y + 2) { enemies[i].vel.x += enemySpeed; }
+                        if (enemies[i].getPos().x < player.getPos().x - 2) { enemies[i].updateVelX(-1); }
+                        else if (enemies[i].getPos().x > player.getPos().x + 2) { enemies[i].updateVelX(1); }
+                        if (enemies[i].getPos().y < player.getPos().y - 2) { enemies[i].updateVelY(-1); }
+                        else if (enemies[i].getPos().y > player.getPos().y + 2) { enemies[i].updateVelY(1); }
                     }
                     
                     
@@ -228,61 +249,17 @@ int main()
             }
             else
             {
-                std::cout << "Index2: " << i << std::endl;
-            	if((enemies[i].pos.x<500 || enemies[i].pos.x>mapW+500)|| (enemies[i].pos.y < 500 || enemies[i].pos.y>mapH+500))
-            	{
-                    
-                    if (enemies[i].pos.x < 500) { enemies[i].vel.x += rand() % (int)(enemySpeed * 2 + 1); }
-                    else if(enemies[i].pos.x > mapW-500) { enemies[i].vel.x += (rand() % (int)(enemySpeed * 2 + 1) *-1); }
-            		if (enemies[i].pos.y < 500) { enemies[i].vel.y += rand() % (int)(enemySpeed * 2 + 1); }
-                    else if (enemies[i].pos.y > mapH-500) { enemies[i].vel.y += (rand() % (int)(enemySpeed * 2 + 1) * -1); }
-            	}
-                else
-                {
-                    
-                    enemies[i].vel.x += rand() % (int)(enemySpeed*2+1) + (-enemySpeed);
-                    enemies[i].vel.y += rand() % (int)(enemySpeed * 2 + 1) + (-enemySpeed);
-                   
-                }
+                enemies[i].checkOutsideMap();
+
             }
-            std::cout << "Index3: " << i << std::endl;
-            enemies[i].vel.x = std::max(-5.0f, std::min(enemies[i].vel.x, 5.0f));
-            enemies[i].vel.y = std::max(-5.0f, std::min(enemies[i].vel.y, 5.0f));
-            //std::cout << enemies[1].vel.x << " yep" << std::endl;
-            std::cout << "Index3: " << i << std::endl;
-            enemies[i].pos.x += (enemies[i].vel.x); //-offsetX);
-            enemies[i].pos.y += (enemies[i].vel.y); //-offsetY);
-            
-            drawEnemy(app, enemies[i]);
-	        
+        	
+            enemies[i].updatePos();
+            enemies[i].draw(app);
         }
-        tmpX = cameraX / 2;
-        tmpY = cameraY / 2;
-        centreX = std::max(tmpX, std::min(pp.x, mapW+tmpX));
-        centreY = std::max(tmpY, std::min(pp.y, mapH+tmpY));
-        view.setCenter(centreX, centreY);
-        app.setView(view);
-        float newViewX = 1000 * pow(psz / 20, 0.1);
-        float newViewY = 700 * pow(psz / 20, 0.1);
-        if (cameraX < newViewX) { cameraX += 1; }
-        if (cameraY < newViewY) { cameraY += 1; }
-        view.setSize(cameraX, cameraY);
 
-    	
-        sMiniMap.setPosition(centreX + 230, centreY + 80);
+        updateCamera(player, view, app, mapW, mapH, cameraX, cameraY);
 
-        
-        miniMapDot.setRadius(5);
-        miniMapDot.setOrigin(5, 5);
-        std::cout << "PSZ: " << psz << std::endl;
-        miniMapDot.setFillColor(sf::Color(250, 150, 0));
-        miniMapDot.setPosition((centreX + 185)+(pp.x/bgW)*355, (centreY + 35)+(pp.y / bgH) * 355);
-        
-    	
-        app.draw(sMiniMap);
-        app.draw(miniMapDot);
-        std::cout << "CENTRE x" << centreX << std::endl;
-
+        updateMiniMap(sMiniMap, app, centreX, centreY, bgW, bgH, player, miniMapDot);
 
     app.display();
 }

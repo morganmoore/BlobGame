@@ -1,29 +1,39 @@
 #pragma once
 
 #include "entity.h"
+#include <SFML/Graphics.hpp>
 
-class Enemy
+
+class Enemy : public Entity
 {
+	sf::CircleShape enemyShape;
+	Vec2 vel = { 0,0 };
+	float speedIncrement = 1.0f;
+	float awareDist = 20.0f;
+	float distFromPlayer;
+
 public:
-	int size = 15;
-	Colour colour = { 255,0,0 };
-	Position pos = { 0,0 };
-	Velocity vel = { 0.0f, 0.0f };
-	
-/*
-	Enemy(int size1, Position pos1, Velocity vel1, Colour colour1)
+	Enemy(int radius1, Vec2 pos1, Colour colour1)
+		:Entity(radius1, pos1, colour1)
 	{
-		size = size1;
-		pos = pos1;
-		vel = vel1;
-		colour = colour1;
+		enemyShape.setRadius(radius1);
 	}
 
-*/
-
-
+	void updatePos();
+	void draw(sf::RenderWindow& app);
+	void updateVelX(int posNeg);
+	void updateVelY(int posNeg);
+	void checkOutsideMap();
 
 };
+
+
+
+
+
+
+
+
 
 
 
