@@ -51,9 +51,6 @@ void updateMiniMap(sf::Sprite& sMiniMap, sf::RenderWindow& app, float centreX, f
 
 
 
-float Entity::mapH = 2000;
-float Entity::mapW = 2300;
-
 
 
 int main()
@@ -71,13 +68,6 @@ int main()
     sf::View view(sf::Vector2f(centreX, centreY), sf::Vector2f(cameraX, cameraY));
     app.setView(view);
 
-    
-    
-	
-	
-	
-
-	
     app.setFramerateLimit(80);
     int framecount = 0;
     
@@ -125,8 +115,6 @@ int main()
                 
             }
         }
-        
-
         
         framecount++;
     	
@@ -185,8 +173,7 @@ int main()
                         else if (enemies[i].getPos().y > player.getPos().y + 2) { enemies[i].updateVelY(1); }
                     }
                      
-                }
-            		
+                }		
             }
             else
             {

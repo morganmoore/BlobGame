@@ -8,15 +8,15 @@ class Player : public Entity
 {
 	std::string name;
 	sf::CircleShape playerShape;
+	
 public:
 	Player(int size1, Vec2 pos1, Colour colour1, float radius1, std::string name1)
 		:Entity(size1, pos1, colour1)
 	{
 		this->name = name1;
 		this->playerShape.setRadius(radius1);
+		
 	}
-
-
 
 	void draw(sf::RenderWindow& app);
 	void updatePos(float x, float y);

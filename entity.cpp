@@ -1,9 +1,6 @@
 #include "entity.h"
 #include <cmath>
 
-float Entity::mapW = 2000.f;
-float Entity::mapH = 2300.f;
-
 Vec2 Entity::getPos()
 {
 	return pos;
@@ -14,6 +11,11 @@ int Entity::getRadius()
 	return radius;
 }
 
+void Entity::setMapSize(float width, float height)
+{
+	float Entity::mapH = height;
+	float Entity::mapW = width;
+}
 
 void Entity::updateSize(int consumedRadius)
 {

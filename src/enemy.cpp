@@ -1,5 +1,7 @@
 #include "enemy.h"
 
+#include <iostream>
+
 
 void Enemy::updateVelX(int posNeg)
 {
@@ -9,6 +11,11 @@ void Enemy::updateVelX(int posNeg)
 void Enemy::updateVelY(int posNeg)
 {
     vel.y += (rand() % (int)(speedIncrement * 2 + 1)) * posNeg;
+}
+
+float Enemy::getSpeedIncrement()
+{
+    return speedIncrement;
 }
 
 void Enemy::updatePos()
@@ -23,26 +30,22 @@ void Enemy::updatePos()
 
 void Enemy::checkOutsideMap()
 {
-    if ((pos.x<500 || pos.x>mapW - 500) || (pos.y < 500 || pos.y>mapH - 500))
+    if ((pos.x<500 || pos.x>mapW + 500) || (pos.y < 500 || pos.y>mapH + 500))
     {
-
+        std::cout << mapH;
         if (pos.x < 500) { updateVelX(1); }
-        else if (pos.x > mapW - 500) { updateVelX(-1); }
-        if (pos.y < 500) { updateVelX(1); }
-        else if (pos.y > mapH - 500) { updateVelX(-1); }
+        else if (pos.x > mapW + 500) { updateVelX(-1); }
+        if (pos.y < 500) { updateVelY(1); }
+        else if (pos.y > mapH + 500) { updateVelY(-1); }
     }
     else
     {
-
+        
         vel.x += rand() % (int)(speedIncrement * 2 + 1) + (-speedIncrement);
         vel.y += rand() % (int)(speedIncrement * 2 + 1) + (-speedIncrement);
 
     }
 }
-
-
-
-
 
 void Enemy::draw(sf::RenderWindow& app)
 {

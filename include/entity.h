@@ -21,7 +21,8 @@ struct Vec2
 class Entity
 {
 protected:
-	
+	static float mapW ;
+	static float mapH;
 	float radius = 15;
 	float speed;
 	Colour colour = { 0,0,0 };
@@ -35,10 +36,10 @@ public:
 		this->pos = pos1;
 		this->colour = colour1;
 	}
-	static float mapW;
-	static float mapH;
+	
 	Vec2 getPos();
 	int getRadius();
+	static void setMapSize(float width, float height);
 	void updateSize(int radius);
 
 };
